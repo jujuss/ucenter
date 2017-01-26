@@ -6,7 +6,6 @@ app = Flask(__name__)
 
 users = dict()  # email: user
 
-
 def make_response(status_code, data):
     resp = jsonify(data)
     resp.status_code = status_code
@@ -40,12 +39,51 @@ def register():
         "nick_name": nick_name,
         "password": password,
     }
-    return make_response(200, {"result": "success", "code": 0})
+    return make_response(200, {"result": "success", "code": 0,"uses":users})
 
+@app.route("/login", methods=["POST"])
+def login():
+    body = request.get_json()
+    if body is None:
+        return make_response(400, {"err_msg": "no body"})
+
+    # check password
+    email = body.get("email","")
+    password_check = body.get("password_check", "")
+    if password_check == users[email]["password"]:
+        return make_response(200, {"result": "success", "code": 0})
+
+@app.route("/user",methods=["POST"])
+def user():
+    body = request.get_json()
+    email = body.get("email", "")
+    if email is None:
+        return make_response(400, {"err_msg": "no email"})
+    user = users[email]["nick_name"]
+    return make_response(200,{"user":user})
+
+@app.route("/edit",methods=["POST"])
+def edit():
+    body = request.get_json()
+    if body is None:
+        return make_response(400, {"err_msg": "no body"})
+    email = body.get("email", "")
+    new_nick_name = body.get("new_nick_name", "")
+    users[email].update({"nick_name":new_nick_name})
+    return make_response(200, {"user": users})
+
+@app.route("/delete",methods=["POST"])
+def delete():
+    body = request.get_json()
+    if body is None:
+        return make_response(400, {"err_msg": "no body"})
+
+    email = body.get("email","")
+    del users[email]
+    return make_response(200,{"result": "success", "code": 0})
 
 def main():
     app.run(host="0.0.0.0", port=8080, debug=True)
-
 
 if __name__ == "__main__":
     main()
