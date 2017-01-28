@@ -1,10 +1,35 @@
 # encoding: utf-8
 
+import hashlib
+
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-users = dict()  # email: user
+# user model:
+#   - email(string, primary key)
+#   - nick_name(string)
+#   - password(string)
+users = dict()  # email: `User`
+# login tokens:
+#   - key: token
+#   - value: email
+tokens = dict()  # token: email
+
+
+class User(object):
+    def __init__(self, email, password, nick_name):
+        self.email = email
+        self.password = password
+        self.nick_name = nick_name
+
+    def dict(self):
+        return {
+            "email": self.email,
+            "password": self.password,
+            "nick_name": self.nick_name,
+        }
+
 
 def make_response(status_code, data):
     resp = jsonify(data)
@@ -13,6 +38,7 @@ def make_response(status_code, data):
 
 
 @app.route("/register", methods=["POST"])
+# TODO: use make response decorator
 def register():
     body = request.get_json()
     if body is None:
@@ -35,11 +61,14 @@ def register():
     if users.get(email) is not None:
         return make_response(400, {"err_msg": "email has registered"})
 
-    users[email] = {
-        "nick_name": nick_name,
-        "password": password,
-    }
-    return make_response(200, {"result": "success", "code": 0,"uses":users})
+    users[email] = User(email, password, nick_name)  # save user to db
+
+    # genereate users data
+    users_data = []
+    for email in users:
+        users_data.append(users[email].dict())
+    return make_response(200, {"result": "success", "code": 0, "users": users_data})
+
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -47,28 +76,51 @@ def login():
     if body is None:
         return make_response(400, {"err_msg": "no body"})
 
-    # TODO:check email
-    email = body.get("email","")
-    if users.get(email) is None:
-        return make_response(400, {"err_msg": "email has not registered"})
-
-    #TODO:check password
-    password_check = body.get("password_check", "")
-    if password_check == users[email]["password"]:
-        return make_response(200, {"result": "success", "code": 0})
-    elif password_check != users[email]["password"]:
-        return make_response(400, {"err_msg": "passwords wrong"})
-
-@app.route("/user",methods=["POST"])
-def user():
-    body = request.get_json()
+    # TODO:check email syntax
     email = body.get("email", "")
-    if email is None:
-        return make_response(400, {"err_msg": "no email"})
-    user = users[email]["nick_name"]
-    return make_response(200,{"user":user})
+    if email == "":
+        return make_response(400, {"err_msg": "email is empty"})
+    password = body.get("password")
+    if password is None:
+        return make_response(400, {"err_msg": "no given password"})
 
-@app.route("/edit",methods=["POST"])
+    user = users.get(email)  # simluate that query user from db
+    if user is None:
+        return make_response(400, {"err_msg": "user not found"})
+    elif user.password != password:
+        return make_response(400, {"err_msg": "invalid user or password"})
+    else:
+        token = hashlib.sha256(email + password).hexdigest()
+        tokens[token] = email  # note: consider concurrency safe
+        resp = make_response(200, {"result": "success", "code": 0})
+        resp.set_cookie("token", token)  # reference: http://flask.pocoo.org/docs/0.12/quickstart/#cookies
+        return resp
+
+
+@app.route("/profile", methods=["GET"])
+def profile():
+    token = request.cookies.get("token")
+    if token is None or token not in tokens:
+        return make_response(400, {"err_msg": "need login first"})
+
+    email = tokens[token]
+    user = users[email]
+    return make_response(200, {"email": user.email, "nick_name": user.nick_name})
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    token = request.cookies.get("token")
+    if token is None or token not in tokens:
+        return make_response(400, {"err_msg": "need login first"})
+
+    # expire token
+    resp = make_response(200, {"result": "success"})
+    resp.set_cookie("token", "", expires=0)
+    return resp
+
+
+@app.route("/edit",methods=["PUT"])
 def edit():
     body = request.get_json()
     if body is None:
@@ -90,6 +142,7 @@ def delete():
     email = body.get("email","")
     del users[email]
     return make_response(200,{"result": "success", "code": 0})
+
 
 def main():
     app.run(host="0.0.0.0", port=8080, debug=True)
