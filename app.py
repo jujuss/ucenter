@@ -47,11 +47,12 @@ def login():
     if body is None:
         return make_response(400, {"err_msg": "no body"})
 
-    # check password
+    # TODO:check email
     email = body.get("email","")
     if users.get(email) is None:
         return make_response(400, {"err_msg": "email has not registered"})
 
+    #TODO:check password
     password_check = body.get("password_check", "")
     if password_check == users[email]["password"]:
         return make_response(200, {"result": "success", "code": 0})
