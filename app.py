@@ -49,9 +49,14 @@ def login():
 
     # check password
     email = body.get("email","")
+    if users.get(email) is None:
+        return make_response(400, {"err_msg": "email has not registered"})
+
     password_check = body.get("password_check", "")
     if password_check == users[email]["password"]:
         return make_response(200, {"result": "success", "code": 0})
+    elif password_check != users[email]["password"]:
+        return make_response(400, {"err_msg": "passwords wrong"})
 
 @app.route("/user",methods=["POST"])
 def user():
@@ -69,6 +74,9 @@ def edit():
         return make_response(400, {"err_msg": "no body"})
     email = body.get("email", "")
     new_nick_name = body.get("new_nick_name", "")
+    if new_nick_name == "":
+        return make_response(400, {"err_msg": "no new_nick_name"})
+
     users[email].update({"nick_name":new_nick_name})
     return make_response(200, {"user": users})
 
