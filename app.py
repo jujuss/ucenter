@@ -122,16 +122,19 @@ def logout():
 
 @app.route("/edit",methods=["PUT"])
 def edit():
+    token = request.cookies.get("token")
+    if token is None or token not in tokens:
+        return make_response(400, {"err_msg": "need login first"})
+
+    email = tokens[token]
     body = request.get_json()
-    if body is None:
-        return make_response(400, {"err_msg": "no body"})
-    email = body.get("email", "")
     new_nick_name = body.get("new_nick_name", "")
     if new_nick_name == "":
         return make_response(400, {"err_msg": "no new_nick_name"})
 
-    users[email].update({"nick_name":new_nick_name})
-    return make_response(200, {"user": users})
+    users[email].nick_name = new_nick_name
+
+    return make_response(200, {"user": users[email].nick_name})
 
 @app.route("/delete",methods=["POST"])
 def delete():
