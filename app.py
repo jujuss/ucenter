@@ -41,7 +41,7 @@ def make_response(status_code, data):
 # TODO: use make response decorator
 def register():
     body = request.get_json()
-    if body is None:
+    if not body:
         return make_response(400, {"err_msg": "no body"})
 
     # check password
@@ -73,7 +73,7 @@ def register():
 @app.route("/login", methods=["POST"])
 def login():
     body = request.get_json()
-    if body is None:
+    if not body:
         return make_response(400, {"err_msg": "no body"})
 
     # TODO:check email syntax
@@ -139,7 +139,7 @@ def edit():
 @app.route("/delete",methods=["POST"])
 def delete():
     body = request.get_json()
-    if body is None:
+    if not body:
         return make_response(400, {"err_msg": "no body"})
 
     email = body.get("email","")
