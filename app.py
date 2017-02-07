@@ -42,24 +42,24 @@ def make_response(status_code, data):
 def register():
     body = request.get_json()
     if not body:
-        return make_response(400, {"err_msg": "no body"})
+        return make_response(400, {"code": 1, "err_msg": "no body"})
 
     # check password
     password = body.get("password", "")
     password_repeat = body.get("password_repeat", "")
     if password == "":
-        return make_response(400, {"err_msg": "no password"})
+        return make_response(400, {"code": 2, "err_msg": "no password"})
     elif password != password_repeat:
-        return make_response(400, {"err_msg": "two passwords doesn't match"})
+        return make_response(400, {"code": 4, "err_msg": "two passwords doesn't match"})
 
     # TODO: check email syntax
     email = body.get("email")
     if email is None or email == "":
-        return make_response(400, {"err_msg": "email can not be empty"})
+        return make_response(400, {"code": 3, "err_msg": "email can not be empty"})
     nick_name = body.get("nick_name", "")
 
     if users.get(email) is not None:
-        return make_response(400, {"err_msg": "email has registered"})
+        return make_response(400, {"code": 5, "err_msg": "email has registered"})
 
     users[email] = User(email, password, nick_name)  # save user to db
 
@@ -74,21 +74,21 @@ def register():
 def login():
     body = request.get_json()
     if not body:
-        return make_response(400, {"err_msg": "no body"})
+        return make_response(400, {"code": 1, "err_msg": "no body"})
 
     # TODO:check email syntax
     email = body.get("email", "")
     if email == "":
-        return make_response(400, {"err_msg": "email is empty"})
+        return make_response(400, {"code": 3, "err_msg": "email is empty"})
     password = body.get("password")
     if password is None:
-        return make_response(400, {"err_msg": "no given password"})
+        return make_response(400, {"code": 2, "err_msg": "no given password"})
 
     user = users.get(email)  # simluate that query user from db
     if user is None:
-        return make_response(400, {"err_msg": "user not found"})
+        return make_response(400, {"code": 6, "err_msg": "user not found"})
     elif user.password != password:
-        return make_response(400, {"err_msg": "invalid user or password"})
+        return make_response(400, {"code": 7, "err_msg": "invalid user or password"})
     else:
         token = hashlib.sha256(email + password).hexdigest()
         tokens[token] = email  # note: consider concurrency safe
@@ -101,7 +101,7 @@ def login():
 def profile():
     token = request.cookies.get("token")
     if token is None or token not in tokens:
-        return make_response(400, {"err_msg": "need login first"})
+        return make_response(400, {"code": 8, "err_msg": "need login first"})
 
     email = tokens[token]
     user = users[email]
@@ -112,7 +112,7 @@ def profile():
 def logout():
     token = request.cookies.get("token")
     if token is None or token not in tokens:
-        return make_response(400, {"err_msg": "need login first"})
+        return make_response(400, {"code": 8, "err_msg": "need login first"})
 
     # expire token
     resp = make_response(200, {"result": "success"})
@@ -124,13 +124,13 @@ def logout():
 def edit():
     token = request.cookies.get("token")
     if token is None or token not in tokens:
-        return make_response(400, {"err_msg": "need login first"})
+        return make_response(400, {"code": 8, "err_msg": "need login first"})
 
     email = tokens[token]
     body = request.get_json()
     new_nick_name = body.get("new_nick_name", "")
     if new_nick_name == "":
-        return make_response(400, {"err_msg": "no new_nick_name"})
+        return make_response(400, {"code": 9, "err_msg": "no new_nick_name"})
 
     users[email].nick_name = new_nick_name
 
@@ -141,7 +141,7 @@ def edit():
 def delete():
     body = request.get_json()
     if not body:
-        return make_response(400, {"err_msg": "no body"})
+        return make_response(400, {"code": 1, "err_msg": "no body"})
 
     email = body.get("email", "")
     del users[email]
