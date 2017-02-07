@@ -105,7 +105,7 @@ def profile():
 
     email = tokens[token]
     user = users[email]
-    return make_response(200, {"email": user.email, "nick_name": user.nick_name})
+    return make_response(200, {"result": "success", "email": user.email, "nick_name": user.nick_name})
 
 
 @app.route("/logout", methods=["POST"])
