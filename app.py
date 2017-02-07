@@ -120,7 +120,7 @@ def logout():
     return resp
 
 
-@app.route("/edit",methods=["PUT"])
+@app.route("/edit", methods=["PUT"])
 def edit():
     token = request.cookies.get("token")
     if token is None or token not in tokens:
@@ -136,15 +136,16 @@ def edit():
 
     return make_response(200, {"user": users[email].nick_name})
 
-@app.route("/delete",methods=["POST"])
+
+@app.route("/delete", methods=["POST"])
 def delete():
     body = request.get_json()
     if not body:
         return make_response(400, {"err_msg": "no body"})
 
-    email = body.get("email","")
+    email = body.get("email", "")
     del users[email]
-    return make_response(200,{"result": "success", "code": 0})
+    return make_response(200, {"result": "success", "code": 0})
 
 
 def main():
