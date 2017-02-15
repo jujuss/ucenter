@@ -9,13 +9,6 @@ script:
   - ./functional_test.sh
 after_success:
   - ./build_pkg.sh
-before_deploy:
-  - git config --global user.email "builds@travis-ci.com"
-  - git config --global user.name "Travis CI"
-  - export GIT_TAG=$TRAVIS_BRANCH-0.1.$TRAVIS_BUILD_NUMBER
-  - git tag $GIT_TAG -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER"
-  - git push -q https://$TAGPERM@github.com/jujuss/ucenter --tags
-  - ls -R
 deploy:
     provider: releases
     api_key: 7baf360dde232c5933de91551e296f7baf63f7eb
