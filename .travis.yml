@@ -12,6 +12,7 @@ deploy:
   provider: releases
   api_key:
     secure: knWayn0kb8+Mb79tnnyat+IuBdfEHRBfktyPAq313vnfP4B3OC98r99193r1UpPQug1FwFl4r8Ffx8eoPOeDtJMgKl4swXTiuuVzRkGZY3MvQGFnFIMuR5WrS9J20W9B800XGjodSTxhoM66AVCw3ThaIlTjxmfcPQa6LSzBSYY3AftBB3KYk35+wXMZD4wNqPl5kuaPbphVyjabz7dJ1/JoTzgem38tf4xFg+5S036X+Ab9OMFoowbKBQMH2of2RFv7qhhyEJ/4nuHDi1DAfTPFOS+ep+WyEy5bmo1QaKeRnKRCaNoq8AyuZf1Ab8UB51O/OrbiEGck+38yYeOOx+W9LhxYISifFNVUF5umFngEj/P1sHkbGB3nDrvGx2TN3Mta79VTv/lHHasM2Gd7Myow/u7HNeR7uytpLjb5whBAyujP+5YmApwD0QlbtTITCSK7Q7a9hO+QcNTPYjLipWMFi8WINcm0ulxK3tfaahgGL8RQw0DzRV4ahpA++zsi7/eKbhMoWnGaekB4tSAPHoReki+lnzana/tcPq2V2/6WuW8b6OHITRWJrGtPavkbHoesw+L3uRa892J3YFui8sDY3cqLYmX/217rd3KFP10q8JIiItxko/26hiZN/00p9bPaRoGz48XordmRTpw9QT/7d2cGlSmwJ7XtWspzTn4=
+  skip_cleanup: true
   file: ucenter*.tar.gz
   on:
     repo: jujuss/ucenter
