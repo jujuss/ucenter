@@ -17,3 +17,4 @@ deploy:
   file_glob: true
   on:
     repo: jujuss/ucenter
+    tags: true
